@@ -5,6 +5,7 @@ FROM python:3.8
 # При изменении файлов на хосте, в контейнере файлы не изменятся
 COPY /stocks_products /stocks_products
 # Устанавливаем библиотеки для проекта
+RUN pip install --upgrade pip
 RUN pip install -r ./stocks_products/requirements.txt
 # указываем рабочую директорию для последующих команд CMD
 WORKDIR /stocks_products

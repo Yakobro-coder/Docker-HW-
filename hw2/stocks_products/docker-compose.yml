@@ -1,30 +1,39 @@
-version: "3.9"
+version: "3.4"
 
 networks:
   backend:
 
 services:
-  python_django:
-    image: python:3.8
-    build:
-      context: stocks_products
-      dockerfile: ./Dockerfile
-    ports:
-      - "8000"
-    networks:
-      - backend
-    restart: unless-stopped
 
   db_pg:
     image: postgres:14
     volumes:
-    - /pg_data:/var/lib/postgresql/data
+      - /root/test/DockerHW/hw2/stocks_products/pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    #Порт проброшен внутри сети контейнеров, но доступа с хоста нету.
     ports:
-      - "5433:5432"
+      - "5432"
     networks:
       - backend
-    restart: unless-stopped
-    depends_on:
-      - python_django
     env_file:
-      - .env
+      - ~/test/DockerHW/hw2/.env
+
+  python_django:
+    image: python:3.8
+    depends_on:
+      - db_pg
+    restart: unless-stopped
+    volumes:
+      - /root/test/DockerHW/hw2/stocks_products:/stocks_products
+    #Билд(build) не работает при запуске нескольких докеров.
+    #По команде "docker-compose build" оздадутся контейнеры по докерФайлу после чего
+    #можно будет запустить компос docker-compose
+    build:
+      context: ~/test/DockerHW/hw2/
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - backend
+    env_file:
+      - ~/test/DockerHW/hw2/.env
