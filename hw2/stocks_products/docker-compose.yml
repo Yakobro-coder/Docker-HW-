@@ -1,0 +1,30 @@
+version: "3.9"
+
+networks:
+  backend:
+
+services:
+  python_django:
+    image: python:3.8
+    build:
+      context: stocks_products
+      dockerfile: ./Dockerfile
+    ports:
+      - "8000"
+    networks:
+      - backend
+    restart: unless-stopped
+
+  db_pg:
+    image: postgres:14
+    volumes:
+    - /pg_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - backend
+    restart: unless-stopped
+    depends_on:
+      - python_django
+    env_file:
+      - .env
