@@ -8,9 +8,9 @@ services:
   db_pg:
     image: postgres:14
     volumes:
-      - /root/test/DockerHW/hw2/stocks_products/pg_data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
     restart: unless-stopped
-    #Порт проброшен внутри сети контейнеров, но доступа с хоста нету.
+    #Порт проброшен внутри сети контейнеров, доступа с хоста нету.
     ports:
       - "5432"
     networks:
@@ -25,15 +25,33 @@ services:
     restart: unless-stopped
     volumes:
       - /root/test/DockerHW/hw2/stocks_products:/stocks_products
-    #Билд(build) не работает при запуске нескольких докеров.
-    #По команде "docker-compose build" оздадутся контейнеры по докерФайлу после чего
-    #можно будет запустить компос docker-compose
+      - static_volume:/root/test/DockerHW/hw2/stocks_products/static/
+    #По команде "docker-compose up -d --build" создадутся контейнеры по докерФайлам после чего
+    # можно будет запустить docker-compose
     build:
       context: ~/test/DockerHW/hw2/
       dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
+    command: gunicorn stocks_products.wsgi:application --bind 0.0.0.0:8000
+    expose:
+      - "8000"
     networks:
       - backend
     env_file:
       - ~/test/DockerHW/hw2/.env
+
+  web:
+    image: nginx
+    build: ./nginx
+    volumes:
+      - /root/test/DockerHW/hw2/stocks_products/static:/home/app/python_django/static
+      - static_volume:/root/test/DockerHW/hw2/stocks_products/static/
+    ports:
+      - "1337:80"
+    networks:
+      - backend
+    depends_on:
+      - python_django
+
+volumes:
+    pg_data:
+    static_volume:

@@ -1,12 +1,13 @@
-1. Собираем образ по "Dockerfile" из текущей директории
+1. Запускаем сборку контейнеров по Dockerfile прописанных в docker-compose.yml и запускаем compose
 
-`docker build -t python_django .`  
-Имя образа - _python_django_
+`docker-compose up -d --build`
 
-2. Запускаем контейнер с образа
+2. Делаем миграцию базы данных
 
-`docker run --name django_prod -d -p 5001:8000 python_django`
+`docker exec stocks_products_python_django_1 python manage.py migrate`
 
-Имя контейнера - _django_prod_
+3. Собирем статику
+
+`docker exec stocks_products_python_django_1 python manage.py collectstatic --no-input --clear`
 
 ------
